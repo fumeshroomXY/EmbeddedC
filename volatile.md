@@ -93,5 +93,18 @@ With `volatile`, compiler:
 
 It ONLY affects **compiler optimizations**.
 
+## Why `volatile` does NOT stop optimization
+`volatile` only **prevents removal/reordering of accesses to that variable**.  
+
+Other optimizations still happen.
+```c
+volatile int a;
+int b;
+
+b = a + a;
+```
+- Compiler must read a twice
+- Still optimizes arithmetic
+
 ## Embedded golden rule  
 Every memory-mapped hardware register must be accessed through a **volatile-qualified type**. No exceptions.
