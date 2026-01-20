@@ -70,10 +70,27 @@ The pointer variable is stored **wherever it is declared**:
 `const` does **not** move the pointer to Flash — only what it points to may be in Flash.
 
 
+## Other Cases
 
-**DO NOT** change the value of `const int` by using a pointer. 
+(1) **DO NOT** change the value of `const int` by using a pointer. 
 ```c
 const int x = 10;
 int *p = (int *)&x;   // cast away const
 *p = 20;              // ❌ Undefined Behavior
 ```
+
+(2)
+`const int *p = &x;` means:
+
+- p is a pointer to a const int
+- `const` applies to what p points to, NOT to x itself.
+- So cannot modify `*p`
+- Can modify `x` directly
+```c
+int x = 10;
+const int *p = &x;
+x = 20;
+*p = 30;   // ❌ error: assignment of read-only location
+```
+
+
