@@ -20,6 +20,32 @@ bytes[3] = 0x12
 - The size of the union is the size of **its largest member**
 - Writing to one member affects how the others are interpreted
 
+## Key Rule: You should only read the union member that was most recently written(active member).
+Example: 
+```c
+union Sample {
+    int  a;
+    char b;
+} s;
+
+s.a = 1024;
+s.b = 'a'; // ASCII of 'a' is 97
+printf("%d\n", s.b);
+
+// Output: 97
+
+printf("%d\n", s.a); // Behavior becomes implementation-defined
+```
+
+## Will the following factors change the result?
+- Endianness?
+Endianness matters only when reinterpreting **multi-byte objects**. We are reading exactly the member we wrote (char `b`).
+- `int` size?
+Irrelevant. `int` was overwritten. Only char `b` is read.
+- Alignment? Not involved
+- Signed vs unsigned `char`?
+Even if char is signed: 'a' = 97, Fits safely in both signed and unsigned char
+
 # Why unions are common in embedded systems
 ## Save RAM (very important on MCUs)
 ```c
