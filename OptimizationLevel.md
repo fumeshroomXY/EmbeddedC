@@ -166,7 +166,7 @@ This is **register allocation + lifetime shortening**
 
 #### Example 3: Register spilling (important!)
 Registers are limited.  
-When there are **too many live variables**, some get pushed back to memory.
+Register spilling happens when the compiler runs out of registers and has to **temporarily store some values in memory** (usually the stack).
 
 ```c
 int foo(int a, int b, int c, int d, int e) {
@@ -184,6 +184,58 @@ Possible behavior:
 mov DWORD PTR [rsp-4], edx   ; spill v3
 ...
 ```
+
+A variable is **live** if:
+- its value has been computed
+- AND it will be used again later
+
+If many variables’ live ranges **overlap**, high register pressure goes up.
+
+
+##### Spilling around function calls (VERY common)
+Calling conventions say:
+- some registers are caller-saved
+- function calls may **clobber** them(= to overwrite a value you didn’t mean to keep)
+
+So if a value must survive a call:
+- it either goes into a callee-saved register
+- OR gets spilled to the stack
+
+```c
+int foo(int a) {
+    int x = a + 1;
+    bar();          // unknown function
+    return x + 2;
+}
+
+lea eax, [rdi + 1]
+mov DWORD PTR [rsp-4], eax   ; spill x
+call bar
+mov eax, DWORD PTR [rsp-4]   ; reload x
+add eax, 2
+ret
+```
+This is *forced* spilling due to ABI rules.
+
+##### Loop-related spilling
+Loops increase pressure because:
+- values must persist across iterations
+- unrolling duplicates live values
+
+```c
+for (int i = 0; i < n; i++) {
+    sum += a[i] * b[i] + c[i];  // i, n, sum, a, a[i], b, b[i], c, c[i] are live
+                                // i, n, sum, a, b, c need to be live across iterations.
+}
+
+// Unroll by 2
+for (int i = 0; i < n; i += 2) {
+    sum += a[i] * b[i] + c[i];
+    sum += a[i + 1] * b[i + 1] + c[i + 1]; // i, n, sum, a, a[i], a[i+1] b, b[i], b[i+1], c, c[i], c[i+1] are live
+                                           // Unrolling duplicates live temporaries.
+}
+```
+Unrolled loop → more temporaries → more spills.
 
 #### Example 4: When register allocation is FORCED off
 `volatile` blocks the optimization.
@@ -205,3 +257,86 @@ add eax, 1
 ret
 ```
 Very important for **embedded**.
+
+### Instruction reordering
+- As long as observable behavior is the same
+- Improves CPU pipeline & cache usage
+
+#### Example: Loop-invariant code motion (big one in -O2)
+```c
+for (int i = 0; i < n; i++) {
+    sum += a[i] * c;
+}
+```
+`-O2` reorders
+- load `c` **once**
+- **before** the loop
+
+```c
+mov ecx, c        ; hoisted out of loop
+.Lloop:
+imul eax, ecx
+...
+```
+
+### Loop optimizations
+- Loop unrolling
+- Strength reduction
+- Removing redundant calculations
+
+#### Example: Strength reduction (cheap ops replace expensive ones)
+```c
+for (int i = 0; i < n; i++) {
+    sum += a[i * 4];
+}
+
+// -O2 rewrite:
+int *p = a;
+for (int i = 0; i < n; i++) {
+    sum += *p;
+    p += 4;
+}
+```
+- no multiply inside loop
+- just pointer increments
+
+### What disappears under `-O2`
+- Some variables
+- Some stack frames
+- Some function calls
+- Sometimes entire functions
+
+This is why optimized assembly can look **nothing like** your C code.
+
+# Practical advice
+## Common workflow
+```bash
+# Debug build
+gcc -O0 -g main.c
+
+# Release build
+gcc -O2 main.c
+```
+## When learning assembly
+Always start with `-O0`.  
+Then later:
+
+- compile the same code with `-O2`
+- diff the assembly
+- ask: what did the compiler remove or rewrite?
+
+That’s how you really learn optimization.
+
+```c
+int x = 10;
+printf("%d\n", x);
+```
+Under `-O2`:
+- `x` may **never exist**
+- `10` may be printed directly
+- No stack slot, no memory write
+
+So if you’re asking: “Why doesn’t the stack look like I expected?”
+
+**Check your optimization flag first.**
+
