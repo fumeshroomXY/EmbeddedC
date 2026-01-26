@@ -68,6 +68,7 @@ Without `volatile`, the compiler might:
 With `volatile`, the compiler might:
 - Every read → actual memory read
 - Every write → actual memory write
+- **Not** keep it only in a register
 - No caching
 - No removal
 
