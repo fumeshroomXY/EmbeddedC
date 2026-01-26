@@ -123,8 +123,8 @@ ret
 #### Example 2: Variable lives only in a register
 ```c
 int foo(int a) {
-    int x = a + 3;
-    int y = x * 2;
+    int x = a + 1;
+    int y = x + 2;
     return y;
 }
 ```
@@ -133,18 +133,75 @@ int foo(int a) {
 - `x` and `y` both on stack
 ```markdown
 mov DWORD PTR [rbp-4], edi   ; a
-add DWORD PTR [rbp-4], 3    ; x
+add DWORD PTR [rbp-4], 1    ; x
 mov eax, DWORD PTR [rbp-4]
-add eax, eax                ; y = x * 2
+add eax, 2                ; y = x + 2
 ```
 
 ##### -O2
 ```markdown
-lea eax, [rdi + 3]   ; x in eax
-add eax, eax        ; y in eax
+lea eax, [rdi + 1]   ; x in eax
+add eax, 2        ; y in eax
 ret
 ```
 - `x` and `y` **share the same register**
 - No memory
 - Lifetime of x ends exactly where y starts
 
+##### Why `gdb` says `<optimized out>`
+At `-O2`:
+- `x` exists only **temporarily**, then overwritten
+
+
+Debugger view:
+```bash
+(gdb) print x
+$1 = <optimized out>
+```
+Why?
+- No memory location
+- No stable register
+- Value no longer exists
+This is **register allocation + lifetime shortening**
+
+#### Example 3: Register spilling (important!)
+Registers are limited.  
+When there are **too many live variables**, some get pushed back to memory.
+
+```c
+int foo(int a, int b, int c, int d, int e) {
+    int v1 = a + b;
+    int v2 = b + c;
+    int v3 = c + d;
+    int v4 = d + e;
+    return v1 + v2 + v3 + v4;
+}
+```
+Possible behavior:
+- Some variables in registers
+- Others **spilled** to stack
+```c
+mov DWORD PTR [rsp-4], edx   ; spill v3
+...
+```
+
+#### Example 4: When register allocation is FORCED off
+`volatile` blocks the optimization.
+```c
+int foo(void) {
+    volatile int x = 5; // here is for demonstration, volatile on a plain local is usually uncommon
+    return x + 1;
+}
+```
+Now compiler **MUST**:
+- write `x` to memory
+- read it back
+
+Even at `-O2`:
+```markdown
+mov DWORD PTR [rsp-4], 5
+mov eax, DWORD PTR [rsp-4]
+add eax, 1
+ret
+```
+Very important for **embedded**.
