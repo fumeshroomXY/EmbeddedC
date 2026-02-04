@@ -29,7 +29,9 @@ What happens:
 - Line markers (#line) added
 
 
-Output: **.i file** for every .c file
+Output: **.i file** for every .c file. 
+
+The size of .i file is **much bigger** than .c file because we have all header files included and all macros expanded.
 
 # Compilation
 ```bash
@@ -39,6 +41,8 @@ arm-none-eabi-gcc -c main.c
 What happens:
 - C → Assembly → Object file (.o)
 - No linking yet
+- Translate into machine code based on the **instruction set**.
+- Generated code depends on the **processor type, architecture and optimization level**.
 
 ## Parsing
 - parse .i files
