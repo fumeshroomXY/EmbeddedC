@@ -106,8 +106,65 @@ ADD r0, r1, r2
 
 Output: **main.o, uart.o, gpio.o**
 
+## Compile without linking
+the `-c` option means: **Compile only — do NOT link**  
+When you run:
+```bash
+gcc -c main.c
+```
+It:
+- ✅ Preprocesses
+- ✅ Compiles
+- ✅ Assembles
+- ❌ Does **NOT** link
+
+
+Output:
+```bash
+main.o
+```
+You get **an object file**, not an executable.
+
+### Why this matters in Embedded C
+In embedded development, you usually:
+```bash
+arm-none-eabi-gcc -c main.c
+arm-none-eabi-gcc -c driver.c
+arm-none-eabi-gcc -c startup.c
+```
+This produces:
+```bash
+main.o
+driver.o
+startup.o
+```
+Then later you link them together:
+```bash
+arm-none-eabi-gcc main.o driver.o startup.o -T linker.ld -o firmware.elf
+```
+So `-c` lets you:
+- Compile files separately
+- Avoid linking errors during development
+- Speed up builds (only recompile changed files)
+- Create static libraries (`.a`)
+
+### If you forget `-c`
+If you do:
+```bash
+arm-none-eabi-gcc main.c
+```
+The compiler will try to **link immediately after compilation** and may fail with:
+```bash
+undefined reference to 'printf'
+```
+Especially common in embedded systems where:
+- You need a linker script
+- There is no standard C library
+- You don’t have a normal OS
+
+
 # Linking(very important!)
-Combines all object files into one executable **.elf file**(debugging)
+Combines all object files into one executable **.elf file**(for debugging)
 ```bash
 arm-none-eabi-gcc \
   main.o uart.o gpio.o startup.o \
@@ -115,6 +172,7 @@ arm-none-eabi-gcc \
   -o firmware.elf
 ```
 
+**What does Linker do:**
 ## Symbol resolution
 Matches **function and variable** references to their definitions
 
@@ -144,6 +202,8 @@ Unlike PC programs, **embedded systems have fixed memory**:
 | ------ | ----------------- |
 | Flash  | code, const       |
 | RAM    | stack, heap, data |
+
+
 The linker decides:
 - `.text` → Flash (0x08000000)
 - `.data` → RAM (0x20000000)
@@ -152,7 +212,7 @@ The linker decides:
 
 This is controlled by the **linker script**.
 
-**Role of the linker script (linker.ld)**  
+### Role of the linker script (linker.ld)
 Embedded systems have no OS to load programs.
 
 The linker must:
