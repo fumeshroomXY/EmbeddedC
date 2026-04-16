@@ -57,3 +57,19 @@ In function call:
 gpio_set(GPIO_PORT_0_PIN_4, HIGH);
 ```
 We can directly use **GPIO_PORT_0_PIN_4**, but only in places that expect a **gpio_port_pin_t** value
+
+
+## Correct ways to “reverse” GPIO level
+```c
+typedef enum
+{
+    GPIO_LEVEL_LOW = 0,
+    GPIO_LEVEL_HIGH
+} gpio_level_t;
+
+// × Wrong, ~ means bitwise, not logical.
+gpio_level_t level = ~GPIO_LEVEL_HIGH;
+
+// Correct:
+level = (level == GPIO_LEVEL_HIGH) ? GPIO_LEVEL_LOW : GPIO_LEVEL_HIGH;
+```
