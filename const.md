@@ -1,7 +1,7 @@
 `const` behaves very differently on MCUs than on PCs. 
 
 # Where are `const` objects stored in Embedded C?
-
+## `const` global variable
 `const` global data is usually stored in **Flash (ROM)**  
 Non-const data is stored in **RAM**  
 
