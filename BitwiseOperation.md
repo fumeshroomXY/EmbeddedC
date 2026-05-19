@@ -38,7 +38,10 @@ if (x | (0 << 5)) { //does NOT test bit 5. It tests any bit at all
 - Use AND with the inverse of a mask to clear(=0)
 - Use XOR to toggle
 
-# LSB, MSB
+## LSB, MSB
+- **Inside a single byte or word**
+- Which bit is the smallest or largest weight
+
 LSB — Least Significant Bit  
 - The rightmost bit
 - Has the smallest value
@@ -46,6 +49,13 @@ LSB — Least Significant Bit
 MSB — Most Significant Bit  
 - The leftmost bit
 - Has the largest value
+
+In communication protocols, some protocols specify **bit transmission order**:
+
+- MSB‑first → send bit7 first
+- LSB‑first → send bit0 first
+
+But the meaning of MSB/LSB stays the same.
 
 ## Endianness (related but different!)
 | Concept           | Meaning              |
