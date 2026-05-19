@@ -205,6 +205,8 @@ So RMW may already:
 - Trigger an unintentional action
 
 (2) `volatile` does **NOT** save you
+
+
 volatile only guarantees:
 - The read happens
 - The write happens
