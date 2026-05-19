@@ -9,6 +9,8 @@ static void helper(void) {
 - The function can be called only inside this source file
 - It is hidden from the linker
 - Other .c files cannot call it, even with `extern`
+
+
 static function = **private function**
 
 ## Why use static functions?
