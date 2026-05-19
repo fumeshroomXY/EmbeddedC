@@ -223,12 +223,6 @@ It does **NOT** guarantee:
 *REG |= REG_A_BIT;
 ```
 
-- With volatile pointer
-```c
-reg32 |= (1U << 0);
-```
-This still does RMW, but you control the exact bits and can follow datasheet rules.
-
 - Or use hardware-provided SET/CLEAR registers
 ```c
 // Many MCUs provide:
