@@ -53,7 +53,7 @@ Compiler must:
 - Cannot assume it stays 0
 
 
-Example:
+## Real Example
 ```c
 #define GPIOA_ODR (*(volatile unsigned int*)0x40000014)
 ```
