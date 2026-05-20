@@ -72,6 +72,7 @@ With `volatile`, the compiler might:
 - No caching
 - No removal
 
+For example:
 ```c
 GPIOA_ODR |= (1 << 5);
 GPIOA_ODR |= (1 << 6);
