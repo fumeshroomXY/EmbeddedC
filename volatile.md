@@ -105,7 +105,7 @@ int b;
 
 b = a + a;
 ```
-- Compiler must read a twice
+- Compiler must read `a` twice
 - Still optimizes arithmetic
 
 ## Embedded golden rule  
