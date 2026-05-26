@@ -17,13 +17,15 @@ These architectures use **32‑bit (4‑byte)** instructions, so:
 # Variable‑length ISAs (like x86, ARM Thumb, RISC‑V compressed)
 Instructions can be 1, 2, 3, … up to 15 bytes (x86 example).
 
+ <img src="./images/instructionlength.png" width=80%>
+
 This means:
 
 - The next instruction does **NOT** necessarily start at a 4‑byte boundary
 
-- The CPU must **decode the current instruction** to know where the next one begins
+- The CPU must **decode the current instruction** to know where the next one begins(the total instruction length can be calculated in the current instruction.)
 
-- The PC increments by the actual instruction length, not a fixed number
+- The PC increments by the actual instruction length, not a fixed number. **𝑃𝐶 ← 𝑃𝐶 + instruction_length**
 
 
 It does make the hardware **more complex**:
