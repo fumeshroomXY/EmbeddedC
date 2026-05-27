@@ -279,6 +279,11 @@ imul eax, ecx
 ...
 ```
 
+A real example:
+
+
+<img src="./images/InstructionOrder.png" width=80%>
+
 ### Loop optimizations
 - Loop unrolling
 - Strength reduction
