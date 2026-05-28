@@ -65,15 +65,6 @@ if (1 + 1 == 3) { // evaluates expressions it can fully determine at compile tim
 ```
 completely removed
 
-```c
-int x = read_sensor();
-
-if (x) {
-    do_something();
-}
-```
-- Since `x` depends on runtime input, compiler must **keep the branch**.
-
 ### Inlining
 ```c
 int square(int x) { return x * x; }
@@ -162,6 +153,7 @@ Why?
 - No memory location
 - No stable register
 - Value no longer exists
+
 This is **register allocation + lifetime shortening**
 
 #### Example 3: Register spilling (important!)
@@ -195,7 +187,7 @@ If many variables’ live ranges **overlap**, high register pressure goes up.
 ##### Spilling around function calls (VERY common)
 Calling conventions say:
 - some registers are caller-saved
-- function calls may **clobber** them(= to overwrite a value you didn’t mean to keep)
+- function calls may **clobber** them(= to overwrite a value)
 
 So if a value must survive a call:
 - it either goes into a callee-saved register
